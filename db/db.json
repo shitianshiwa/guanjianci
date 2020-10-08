@@ -1,0 +1,21 @@
+{
+    "guanjianci": {
+        "quanju": [{
+                "name": "。工具",
+                "enable": "true",
+                "mohuchaxun": "false",
+                "enablecq": "true",
+                "enableat": "true",
+                "neirong": "tools"
+            },
+            {
+                "name": "机器人 robot",
+                "enable": "true",
+                "mohuchaxun": "false",
+                "enablecq": "true",
+                "enableat": "true",
+                "neirong": "test"
+            }
+        ]
+    }
+}
