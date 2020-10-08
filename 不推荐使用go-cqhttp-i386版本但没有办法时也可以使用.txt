@@ -1,0 +1,4 @@
+https://github.com/Mrs4s/go-cqhttp/issues/93
+可以修改
+"enable_db": true 为false
+关闭后将无法使用 回复/撤回 等上下文相关接口
