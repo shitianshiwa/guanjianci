@@ -1,3 +1,4 @@
+process.env.TZ='Asia/Shanghai';
 const credentials = require("./credentials");
 const bot = require('./bot'); //酷Q机器人的api
 const logger = require('./lib/logger'); //日志记录
