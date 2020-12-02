@@ -716,8 +716,8 @@ let t = new Date();
 logger.info('关键词和加群退群,' + t.toString() + dayjs(t.toString()).format(' A 星期d'));
 bot('get_status').then(data1 => {
     logger.info(JSON.stringify(data1));
-    if (data1.data.online != false || data1.data.online != null || data1.data.app_good != false) {
-        logger.info(t.toString() + dayjs(t.toString()).format(' A 星期d').replace("星期0", "星期天") + ", gocqhttp在线中：" + data1.data.online + "\n" + "cqhttp插件正常运行中：" + data1.data.app_good);
+    if (data1.data.online != false || data1.data.online != null) {
+        logger.info(t.toString() + dayjs(t.toString()).format(' A 星期d').replace("星期0", "星期天") + ", gocqhttp在线中：" + data1.data.online);
         bot('send_private_msg', {
             user_id: credentials.admin,
             message: `关键词和加群退群插件已启动`,
