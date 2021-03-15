@@ -1,8 +1,10 @@
 # guanjianci
 
-# 除非是第一次使用go-cqhttp，否则启动插件里面的go-cqhttp前，先把device.json（虚拟设备信息）文件复制过去，防止出现频繁使用新设备登录QQ，导致机器人QQ被冻结！
+# 最新版本go-cqhttp是v0.9.40-fix4
 
-# 注意！如果使用npm i 安装模块，要修改node_modules\cqhttp\src\main.js 第77行 return Promise.resolve(data.data); 为 return Promise.resolve(data); 否则脚本会报错
+## 除非是第一次使用go-cqhttp，否则启动插件里面的go-cqhttp前，先把device.json（虚拟设备信息）文件复制过去，防止出现频繁使用新设备登录QQ，导致机器人QQ被冻结！
+
+## 注意！如果使用npm i 安装模块，要修改node_modules\cqhttp\src\main.js 第77行 return Promise.resolve(data.data); 为 return Promise.resolve(data); 否则脚本会报错
 https://github.com/shitianshiwa/guanjianci
 
  该插件适配于go-cqhttp：https://github.com/Mrs4s/go-cqhttp/ 以提供v0.9.27 windows 64位 & linux-amd64 不推荐使用windows 32位 
