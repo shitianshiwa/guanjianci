@@ -509,7 +509,7 @@ async function run2() {
                 });
             }
         }).catch(err => {
-            logger.error(new Date().toString() + "获取并储存群成员昵称列表2:" + JSON.stringify(err));
+            logger.error(new Date().toString() + "获取并储存群成员昵称列表2:" + err);
         });
     }
     await group(); //初始化获取群成员昵称列表
