@@ -6,6 +6,7 @@
                 "mohuchaxun": "false",
                 "enablecq": "true",
                 "enableat": "true",
+                "enablereply": "false",
                 "neirong": "tools"
             },
             {
@@ -14,6 +15,7 @@
                 "mohuchaxun": "false",
                 "enablecq": "true",
                 "enableat": "true",
+                "enablereply": "false",
                 "neirong": "test"
             }
         ]

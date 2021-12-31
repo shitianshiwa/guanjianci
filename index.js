@@ -1,4 +1,4 @@
-process.env.TZ='Asia/Shanghai';
+process.env.TZ = 'Asia/Shanghai';
 const credentials = require("./credentials");
 const bot = require('./bot'); //酷Q机器人的api
 const logger = require('./lib/logger'); //日志记录
@@ -7,6 +7,8 @@ const db = require('./lib/db');
 const db2 = require('./lib/db2');
 const PFCache = require('./lib/PFCache');
 const NodeCache = require('node-cache');
+const CQ = require('./lib/CQcode');
+
 const cache = new NodeCache({
     stdTTL: 1 * 5 //秒
 });
@@ -31,11 +33,12 @@ async function search(context) {
             //console.log(data[i].enable);
             //console.log(data[i].mohuchaxun);
             //console.log(data[i].neirong);
-            s2 += "关键词：" + data[i].name;
-            s2 += ",开关：" + data[i].enable;
-            s2 += ",模糊还是精确：" + data[i].mohuchaxun;
-            s2 += ",是否解析cq码：" + data[i].enablecq;
-            s2 += ",是否at：" + data[i].enableat;
+            s2 += "关键词:" + data[i].name;
+            s2 += ",开关:" + data[i].enable;
+            s2 += ",模糊还是精确:" + data[i].mohuchaxun;
+            s2 += ",是否解析cq码:" + data[i].enablecq;
+            s2 += ",是否at:" + data[i].enableat;
+            s2 += ",是否回复到触发者:" + data[i].enablereply;
             //s2 += ",内容：" + data[i].neirong;//可能内容过长，所以不显示
             s1 += s2 + "\n";
         }
@@ -43,13 +46,13 @@ async function search(context) {
         if (context.message_type == 'private') {
             send_private_msg(context, credentials.xiaoxi + "\n" + s1 + "");
         } else {
-            send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + credentials.xiaoxi + "\n" + s1 + "");
+            send_group_msg(context, credentials.xiaoxi + "\n" + s1 + "", false, true, false);
         }
     } else {
         if (context.message_type == 'private') {
             send_private_msg(context, credentials.xiaoxi + "\n未找到设定的关键词列表列表");
         } else {
-            send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + credentials.xiaoxi + "\n未找到设定的关键词列表列表");
+            send_group_msg(context, credentials.xiaoxi + "\n未找到设定的关键词列表列表", false, true, false);
         }
     }
 }
@@ -126,17 +129,17 @@ async function run() {
                             enable: temp2
                         }).write();
 
-                        send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + temp3);
+                        send_group_msg(context, temp3, false, true, false);
                         await search(context);
                     } else {
                         let t = new Date();
                         logger.error(t.toString() + dayjs(t.toString()).format(' A 星期d') + "未找到关键词:" + data);
-                        send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + "未找到关键词:" + data);
+                        send_group_msg(context, "未找到关键词:" + data, false, true, false);
                     }
                 } else {
                     let t = new Date();
                     logger.error(t.toString() + dayjs(t.toString()).format(' A 星期d') + "消息解析错误:" + temp);
-                    send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + "消息解析错误1:" + temp);
+                    send_group_msg(context, "消息解析错误1:" + temp, false, true, false);
                 }
                 return;
             }
@@ -354,7 +357,19 @@ async function run() {
                         }
                     }
                     if (temp1 == true) {
-                        send_group_msg(context, (data[i].enableat == "true" ? `[CQ:at,qq=${context.user_id}]\n` : "") + data[i].neirong, data[i].enablecq == "true" ? false : true); //第三项是true为不解析cq码
+                        let cq = true;
+                        let at = false;
+                        let reply = false;
+                        if (data[i].enablecq == "true") {
+                            cq = false; //特殊例子，反的
+                        }
+                        if (data[i].enableat == "true") {
+                            at = true;
+                        }
+                        if (data[i].enablereply == "true") {
+                            reply = true;
+                        }
+                        send_group_msg(context, data[i].neirong, cq, at, reply);
                         break;
                     }
                 }
@@ -369,7 +384,8 @@ async function run() {
             //console.log(credentials.admin)
             let data = await db.read().get(`guanjianci[quanju]`).value();
             //logger.info(data);
-            if (data != undefined) { //console.log(c2);
+            if (data != undefined) {
+                //console.log(c2);
                 //console.log(i2);
                 for (let i = 0; i < data.length; i++) {
                     /*console.log(data[i].name);
@@ -462,12 +478,12 @@ async function search2(context) {
             s2 += "加群发言词开关：" + data[i].kaiguan1 + "\n";
             s2 += "退群发言词开关：" + data[i].kaiguan2 + "\n";
             s2 += "加群发言词：(AT人)" + data[i].come + "\n";
-            s2 += "退群发言词：(显示QQ号)" + data[i].out;
+            s2 += "退群发言词：(显示昵称和QQ号)" + data[i].out;
             //s2 += ",内容：" + data[i].neirong;
             s1 += s2 + "\n";
         }
         //console.log(s1);
-        send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + credentials.xiaoxi2 + s1 + "");
+        send_group_msg(context, credentials.xiaoxi2 + s1 + "", false, true, false);
     } else {
         let key = [];
         let val = String(context.group_id);
@@ -483,7 +499,7 @@ async function search2(context) {
                 out: ""
             })
             .write();
-        send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + credentials.xiaoxi2 + "\n未找到设定的加群退群自动发言列表，系统已自动创建，请再输入'加群进群'查询，默认禁用");
+        send_group_msg(context, credentials.xiaoxi2 + "\n未找到设定的加群退群自动发言列表，系统已自动创建，请再输入'加群进群'查询，默认禁用", false, true, false);
     }
 }
 
@@ -513,7 +529,7 @@ async function run2() {
         });
     }
     await group(); //初始化获取群成员昵称列表
-    setInterval(async () => {
+    setInterval(async() => {
             await group();
         },
         1 * 60 * 60 * 1000); //每1小时更新一次群成员列表
@@ -568,7 +584,7 @@ async function run2() {
                                     out: ""
                                 })
                                 .write();
-                            send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + credentials.xiaoxi2 + "\n未找到设定的加群退群自动发言列表，系统已自动创建，请再输入'加群进群'查询，默认禁用");
+                            send_group_msg(context, credentials.xiaoxi2 + "\n未找到设定的加群退群自动发言列表，系统已自动创建，请再输入'加群进群'查询，默认禁用", false, true, false);
                             return;
                         }
                     } else {
@@ -580,14 +596,15 @@ async function run2() {
                     s = "输入参数错误或缺失、过多，请确认格式为:加群退群开关=true+true";
                 }
                 if (error == true) {
-                    send_group_msg(context, `[CQ:at,qq=${context.user_id}]\n` + s);
+                    send_group_msg(context, s, false, true, false);
                 }
                 return;
             }
         }
     });
-    //加群
+    //加群退群
     bot.on('notice', async context => {
+        logger.info(JSON.stringify(context));
         if (context.notice_type === 'group_increase') {
             // 处理群成员添加事件
             //const name = data.nickname || '新人';
@@ -609,8 +626,7 @@ async function run2() {
                     .write();
             }
             let data2 = await db2.read().get(`jiaquntuiqun[${context.group_id}]`).value()[0];
-            //logger.info(JSON.stringify(context));
-            //logger.info(data2.kaiguan1);
+            logger.info("加群");
             if (data2.kaiguan1 == "true") {
                 send_group_msg(context, `欢迎[CQ:at,qq=${context.user_id}]加入本群!\n${data2.come}`);
                 bot('get_group_member_info', {
@@ -669,18 +685,29 @@ async function run2() {
                     .write();
             }
             let data2 = await db2.read().get(`jiaquntuiqun[${context.group_id}]`).value()[0];
+            logger.info("退群");
             if (data2.kaiguan2 == "true") {
                 let temp = await pfcache.getCache(context.group_id, context.user_id);
                 await pfcache.delCache(context.group_id, context.user_id);
                 //logger.info((temp!=false?temp.nickname:""));
-                send_group_msg(context, `很遗憾${temp!=false&&temp!=""?"("+temp.nickname+")":""}${context.user_id}离开了本群。\n${data2.out}`);
+                send_group_msg(context, `很遗憾${temp != false && temp != "" ? "(" + temp.nickname + ")" : ""}${context.user_id}离开了本群。\n${data2.out}`);
             }
         }
         // 忽略其它事件
     });
 }
-
-function send_group_msg(context, msg, auto_escape = false) {
+/**
+ * 回复群消息
+ *
+ * @param {object} context 消息对象
+ * @param {string} msg 回复内容
+ * @param {boolean} auto_escape 消息内容是否作为纯文本发送 ( 即不解析 CQ 码) , 只在 message 字段是字符串时有效 , 默认值为false
+ * @param {boolean} at 是否at发送者
+ * @param {boolean} reply 是否回复发送者
+ */
+function send_group_msg(context, msg, auto_escape = false, at = false, reply = false) {
+    if (typeof msg !== 'string' || msg.length === 0) return;
+    msg = `${reply==true ? CQ.reply(context.message_id) : ''}${at==true ? CQ.at(context.user_id) : ''}${msg}`;
     bot('send_group_msg', {
         group_id: context.group_id,
         message: msg,
@@ -693,7 +720,13 @@ function send_group_msg(context, msg, auto_escape = false) {
         logger.error(t.toString() + dayjs(t.toString()).format(' A 星期d') + ", 群聊: " + JSON.stringify(err));
     });
 }
-
+/**
+ * 回复私聊消息
+ *
+ * @param {object} context 消息对象
+ * @param {string} msg 回复内容
+ * @param {boolean} auto_escape 消息内容是否作为纯文本发送 ( 即不解析 CQ 码) , 只在 message 字段是字符串时有效 , 默认值为false
+ */
 function send_private_msg(context, msg, auto_escape = false) {
     bot('send_private_msg', {
         user_id: context.user_id,
