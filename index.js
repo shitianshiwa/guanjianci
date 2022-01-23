@@ -529,9 +529,9 @@ async function run2() {
         });
     }
     await group(); //初始化获取群成员昵称列表
-    setInterval(async() => {
-            await group();
-        },
+    setInterval(async () => {
+        await group();
+    },
         1 * 60 * 60 * 1000); //每1小时更新一次群成员列表
     bot.on('message', async context => { //操作
         if (context.message_type == 'group') {
@@ -560,11 +560,11 @@ async function run2() {
                         if (await db2.read().has(`jiaquntuiqun[${context.group_id}]`)
                             .value() == true) {
                             await db2.read().get(`jiaquntuiqun[${context.group_id}]`).find({
-                                    id: context.group_id
-                                }).assign({
-                                    kaiguan1: temp3,
-                                    kaiguan2: temp4,
-                                })
+                                id: context.group_id
+                            }).assign({
+                                kaiguan1: temp3,
+                                kaiguan2: temp4,
+                            })
                                 .write();
                             //logger.info("66666666666666666666");
                             await search2(context);
@@ -707,7 +707,7 @@ async function run2() {
  */
 function send_group_msg(context, msg, auto_escape = false, at = false, reply = false) {
     if (typeof msg !== 'string' || msg.length === 0) return;
-    msg = `${reply==true ? CQ.reply(context.message_id) : ''}${at==true ? CQ.at(context.user_id) : ''}${msg}`;
+    msg = `${reply == true ? CQ.reply(context.message_id) : ''}${at == true ? CQ.at(context.user_id) : ''}${msg}`;
     bot('send_group_msg', {
         group_id: context.group_id,
         message: msg,
@@ -728,17 +728,20 @@ function send_group_msg(context, msg, auto_escape = false, at = false, reply = f
  * @param {boolean} auto_escape 消息内容是否作为纯文本发送 ( 即不解析 CQ 码) , 只在 message 字段是字符串时有效 , 默认值为false
  */
 function send_private_msg(context, msg, auto_escape = false) {
-    bot('send_private_msg', {
-        user_id: context.user_id,
-        message: msg,
-        auto_escape: auto_escape
-    }).then(data => {
-        let t = new Date();
-        logger.info(t.toString() + dayjs(t.toString()).format(' A 星期d') + ", 私聊: " + JSON.stringify(data));
-    }).catch(err => {
-        let t = new Date();
-        logger.error(t.toString() + dayjs(t.toString()).format(' A 星期d') + ", 私聊: " + JSON.stringify(err));
-    });
+    if (context.sub_type == "friend") {//必须是机器人的qq好友才能触发
+        bot('send_private_msg', {
+            user_id: context.user_id,
+            message: msg,
+            auto_escape: auto_escape
+        }).then(data => {
+            let t = new Date();
+            logger.info(t.toString() + dayjs(t.toString()).format(' A 星期d') + ", 私聊: " + JSON.stringify(data));
+        }).catch(err => {
+            let t = new Date();
+            logger.error(t.toString() + dayjs(t.toString()).format(' A 星期d') + ", 私聊: " + JSON.stringify(err));
+        });
+    }
+
 }
 run();
 run2();
